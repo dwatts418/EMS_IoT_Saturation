@@ -1,0 +1,121 @@
+//Configure GPIO Pins
+hardware.pin2.configure(DIGITAL_OUT); //speaker
+hardware.pin5.configure(DIGITAL_OUT); //powerPin
+hardware.pin7.configure(DIGITAL_OUT); //greenLED
+hardware.pin8.configure(DIGITAL_OUT); //blueLED
+hardware.pin9.configure(DIGITAL_OUT); //redLED
+
+//beep a few times to show this little guy has sound
+hardware.pin2.write(1); //speaker
+imp.sleep(0.05);
+hardware.pin2.write(0); //speaker
+imp.sleep(1.0);
+hardware.pin2.write(1); //speaker
+imp.sleep(1.0);
+hardware.pin2.write(0); //speaker
+
+//show device is starting up and all LEDs work
+hardware.pin5.write(1); //power
+hardware.pin7.write(1); //greenLED
+imp.sleep(1.0);
+hardware.pin7.write(0); //greenLED
+imp.sleep(1.0);
+hardware.pin8.write(1); //blueLED
+imp.sleep(1.0);
+hardware.pin8.write(0); //blueLED
+imp.sleep(1.0);
+hardware.pin9.write(1); //redLED
+imp.sleep(1.0);
+hardware.pin9.write(0); //redLED
+hardware.pin5.write(0); //power
+
+agent.on("data",function(msg){
+    server.log(format("Agent incoming: %s", msg));
+    
+    //if status is >= 50% turn on redLED, power and make sure all other LEDs are off
+    if(msg >= "50"){
+        
+        //make sure other LEDs are off
+        hardware.pin7.write(0); //greenLED
+        hardware.pin8.write(0); //blueLED
+        
+        //make sure LED power pin is on
+        hardware.pin5.write(1); //power
+        
+        //flash LED so we know there was a change
+        hardware.pin9.write(1); //redLED
+        imp.sleep(0.5);
+        hardware.pin9.write(0); //redLED
+        imp.sleep(0.5);
+        hardware.pin9.write(1); //redLED
+        imp.sleep(0.5);
+        hardware.pin9.write(0); //redLED
+        imp.sleep(0.5);
+        hardware.pin9.write(1); //redLED
+        imp.sleep(0.5);
+        hardware.pin9.write(0); //redLED
+        imp.sleep(0.5);
+        hardware.pin9.write(1); //redLED
+        
+        //Update server log and planner with current status
+        server.log("Status: RED");
+        server.show("Status: RED");
+    }
+    //if status is >= 36% turn on green/ red LEDs (make yellow), power and make sure all other LEDs are off
+    else if(msg >= "36" && msg < "50"){
+        
+        //make sure other LEDs are off
+        hardware.pin8.write(0); //blueLED
+        
+        //make sure LED power pin is on
+        hardware.pin5.write(1); //power
+        
+        //flash LED so we know there was a change
+        hardware.pin7.write(1); //greenLED
+        hardware.pin9.write(1); //redLED
+        imp.sleep(0.5);
+        hardware.pin7.write(0); //greenLED
+        hardware.pin9.write(0); //redLED
+        imp.sleep(0.5);
+        hardware.pin7.write(1); //greenLED
+        hardware.pin9.write(1); //redLED
+        imp.sleep(0.5);
+        hardware.pin7.write(0); //greenLED
+        hardware.pin9.write(0); //redLED
+        imp.sleep(0.5);
+        hardware.pin7.write(1); //greenLED
+        hardware.pin9.write(1); //redLED
+        
+        //Update server log and planner with current status
+        server.log("Status: YELLOW");
+        server.show("Status: YELLOW");
+    }
+    //if status is <= 35% turn on greenLED, power and make sure all other LEDs are off
+    else if(msg <= "35"){
+        
+        //make sure other LEDs are off
+        hardware.pin9.write(0); //redLED
+        hardware.pin8.write(0); //blueLED
+        
+        //make sure LED power pin is on
+        hardware.pin5.write(1); //power
+        
+        //flash LED so we know there was a change
+        hardware.pin7.write(1); //greenLED
+        imp.sleep(0.5);
+        hardware.pin7.write(0); //greenLED
+        imp.sleep(0.5);
+        hardware.pin7.write(1); //greenLED
+        imp.sleep(0.5);
+        hardware.pin7.write(0); //greenLED
+        imp.sleep(0.5);
+        hardware.pin7.write(1); //greenLED
+        
+        //Update server log and planner with current status
+        server.log("Status: GREEN");
+        server.show("Status: GREEN");
+    }
+});
+
+server.show("Imp Configured")
+imp.configure("EMS Status", [], []);
