@@ -1,0 +1,25 @@
+responses <- [];                         
+lastResponse <- []; 
+http.onrequest(function(request,res){    
+    server.log("Data recieved from PUT");
+    //server.log(format("HTTP incoming: %s", request.body));
+    t <- http.urldecode(request.body);   
+    responses.push(res);                
+    device.send("data",t.data);       //t.data  
+    res.send(200, "Status Updated");             
+    responses = []; 
+});
+
+function getStatus() {
+    server.log("getStatus Function Called");
+    response <- http.get("http://SERVER URL HERE").sendsync();
+    server.log("GET request send to CF server");                
+} 
+
+function update(){
+    server.log("update Function Called");
+    getStatus();
+    imp.wakeup(300.0,update);
+}
+update();
+//getStatus();
